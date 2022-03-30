@@ -1,1 +1,482 @@
 https://infoinspired.com/google-docs/spreadsheet/multiple-contains-in-where-clause-in-query/
+-------------Book Learning google-apps Scripts------------------------
+book link - https://riptutorial.com/ebook/google-apps-script
+please send your feedback and corrections to info@zzzprojects.com
+http://www.google.com/script/start
+https://script.google.com/home/start - start learn from here
+https://developers.google.com/apps-script/guides/services/#basic_javascript_features
+https://developers.google.com/apps-script/guides/services/advanced
+script.google.com
+Official documentation can be found at developers.google.com/apps-script/ 
+https://developers.google.com/apps-script/samples
+
+script.google.com - to start scripting
+
+The code.gs file must contain a function named doGet (standalone scripts) or an onOpen function
+
+For Google apps for education/work/government there are settings in the domain admin console that can be adjusted to allow or disallow app-scripts to run.
+
+Standalone - https://developers.google.com/apps-script/guides/standalone
+Bound - https://developers.google.com/apps-script/guides/bound
+Web - https://developers.google.com/apps-script/guides/web
+
+For any script
+to work as a web app, script has to meet two requirements:
+• include a doGet() or doPost() function.
+The function returns an HTML service HtmlOutput object or a Content service TextOutput
+object.
+
+ctrl + r from your keyboard to run the code.
+
+//not working
+function helloWorld()
+{
+Browser.msgBox("Hello World");
+}
+
+User authentication is baked into the platform via OAuth2 and requires no code or setup by the script author.
+
+Unlike Nodejs, which is event driven, App Scripts runs in a
+threaded model. All calls to a script generate a unique instance of that script which runs in
+isolation of all other instances.
+
+Chapter 2: Apps Script Web Apps
+
+/**
+* Divides n by d unless d is zero, in which case, it returns
+* the given symbol.
+*
+* @param {n} number The numerator
+* @param {d} number The divisor
+* @param {symbol} string The symbol to display if `d == 0`
+* @return {number or string} The result of division or the given symbol
+*
+* @customfunction
+*/
+function zeroSafeDivide(n, d, symbol) {
+if (d == 0)
+return symbol;
+else
+return n / d;
+}
+
+calling from sheet  =zeroSafeDivide(5,0,"-")  
+
+
+Chapter 5: DriveApp Examples
+
+--create folder
+function createNewFolderInGoogleDrive(folderName) {
+return DriveApp.createFolder(folderName);
+}
+
+function createfolder(){
+  var newFolder = createNewFolderInGoogleDrive('Test folder');
+  Logger.log(newFolder.getId());
+
+}
+
+--Create new file in Google Drive of a certain Mime type with date on end
+function createGoogleDriveFileOfMimeType() {
+var content,fileName,newFile;//Declare variable names
+fileName = "Test File " + new Date().toString().slice(0,15);//Create a new file name with
+date on end
+content = "This is the file Content";
+newFile = DriveApp.createFile(fileName,content,MimeType.JAVASCRIPT);//Create a new file in the root folder
+
+// newFile = DriveApp.createFile(fileName,content);//Create a new text file in the root folder
+};
+
+--create a new blob file
+Create a new file in Google drive from a blob
+function createGoogleDriveFileWithBlob() {
+var blob,character,data,fileName,i,L,max,min,newFile,randomNmbr;//Declare variable names
+fileName = "Test Blob " + new Date().toString().slice(0,15);//Create a new file name with
+date on end
+L = 500;//Define how many times to loop
+data = "";
+max = 126;
+min = 55;
+for (i=0;i<L;i+=1) {//Loop to create data
+randomNmbr = Math.floor(Math.random()*(max-min+1)+min);//Create a random number
+//Logger.log('randomNmbr: ' + randomNmbr);
+character = String.fromCharCode(randomNmbr);
+//Logger.log('character: ' + character);//Print the character to the Logs
+data = data + character;
+};
+blob = Utilities.newBlob(data, MimeType.PLAIN_TEXT, fileName);//Create a blob with random
+characters
+newFile = DriveApp.createFile(blob);//Create a new file from a blob
+newFile.setName(fileName);//Set the file name of the new file
+};
+
+--- Get all files - put them into a continuation token - then retrieve them
+function processGoogleDriveFiles() {
+var arrayAllFileNames,continuationToken,files,filesFromToken,fileIterator,thisFile;//Declare
+variable names
+arrayAllFileNames = [];//Create an empty array and assign it to this variable name
+files = DriveApp.getFiles();//Get all files from Google Drive in this account
+continuationToken = files.getContinuationToken();//Get the continuation token
+Utilities.sleep(18000);//Pause the code for 3 seconds
+filesFromToken = DriveApp.continueFileIterator(continuationToken);//Get the original files
+stored in the token
+files = null;//Delete the files that were stored in the original variable, to prove that the
+continuation token is working
+while (filesFromToken.hasNext()) {//If there is a next file, then continue looping
+thisFile = filesFromToken.next();//Get the next file
+arrayAllFileNames.push(thisFile.getName());//Get the name of the next file
+};
+Logger.log(arrayAllFileNames);
+};
+
+
+---Add a folder to the root drive
+function DriveAppAddFolder(child) {//Adds file to the root drive in Google Drive
+var body,returnedFolder;//Declare variable names
+if (!child) {
+body = "There is no folder";
+MailApp.sendEmail(Session.getEffectiveUser().getEmail(), "", "Error Adding Folder!", body)
+return;
+};
+returnedFolder = DriveApp.addFolder(child);//Add a folder to the root drive
+Logger.log('returnedFolder: ' + returnedFolder);//Print the folder results to the Logs
+};
+function createNewFolderInGoogleDrive() {
+var folder,newFolderName,timeStamp,dateTimeAsString;
+timeStamp = new Date();//Create a new date
+dateTimeAsString = timeStamp.toString().slice(0,15);
+newFolderName = 'Test Folder Name ' + dateTimeAsString;//Create new folder name with
+date/time appended to name
+folder = DriveApp.createFolder(newFolderName);//Create a new folder
+DriveAppAddFolder(folder);//Call a function and pass a folder to the function
+};
+
+
+----Create a new text file and add it to the root folder
+function DriveAppAddFile(child) {//Adds file to the root drive in Google Drive
+var body,returnedFolder;//Declare variable names
+if (!child) {
+body = "There is no file";
+MailApp.sendEmail(Session.getEffectiveUser().getEmail(), "", "Error Adding File!", body)
+return;
+};
+returnedFolder = DriveApp.addFile(child);
+Logger.log('returnedFolder: ' + returnedFolder);
+};
+function createNewFileInGoogleDrive() {
+var content,file,newFileName,timeStamp,dateTimeAsString;
+timeStamp = new Date();//Create a new date
+dateTimeAsString = timeStamp.toString().slice(0,15);
+content = "This is test file content, created at: " + dateTimeAsString;//Create content for
+new file
+newFileName = 'Test File ' + dateTimeAsString;//Create new file name with date/time appended
+to name
+file = DriveApp.createFile(newFileName, content);//Create a new file
+DriveAppAddFile(file);//Call a function and pass a file to the function
+};
+
+
+---Get all Files in a Drive Folder
+function onOpen() {
+// Add a custom menu to run the script
+var ss = SpreadsheetApp.getActiveSpreadsheet();
+var searchMenuEntries = [ {name: "Run", functionName: "search"}];
+ss.addMenu("Get Files", searchMenuEntries);
+}
+function getFiles() {
+// Get the active spreadsheet and the active sheet
+var ss = SpreadsheetApp.getActiveSpreadsheet();
+var ssid = ss.getId();
+// Look in the same folder the sheet exists in. For example, if this template is in
+// My Drive, it will return all of the files in My Drive.
+var ssparents = DriveApp.getFileById(ssid).getParents();
+var sheet = ss.getActiveSheet();
+// Set up the spreadsheet to display the results
+var headers = [["Last Updated", "File Owner", "File Name", "File URL"]];
+sheet.getRange("A1:D").clear();
+sheet.getRange("A1:D1").setValues(headers);
+// Loop through all the files and add the values to the spreadsheet.
+var folder = ssparents.next();
+var files = folder.getFiles();
+var i=1;
+while(files.hasNext()) {
+var file = files.next();
+if(ss.getId() == file.getId()){
+continue;
+}
+sheet.getRange(i+1, 1, 1,
+4).setValues([[file.getLastUpdated(),file.getOwner().getName(),file.getName(),
+file.getUrl()]]);
+i++;
+}
+}
+
+Chapter 6: DriveApp - getFileById(id)
+Get a file from Google Drive using the file ID
+function getGoogleDriveFileById(id) {
+var file;
+file = DriveApp.getFileById(id);//Returns a file - The "id" must be a string
+//One way to manually get a file ID
+// - Open the file from Google Drive
+// - The file ID is in the URL in the browsers address bar
+//https://docs.google.com/spreadsheets/d/File_ID_is_here/edit#gid=0
+};
+
+
+Chapter 7: DriveApp Service
+Remarks
+Google Mime types can not be used for the third parameter of Mime Types. Using a Google Mime
+Type will result in an error that states:
+Cannot use "DriveApp.createFile()" to create Google MIME types. Please use Advanced Drive
+Service
+MimeType.GOOGLE_APPS_SCRIPT
+MimeType.GOOGLE_DOCS
+MimeType.GOOGLE_DRAWINGS
+MimeType.GOOGLE_FORMS
+MimeType.GOOGLE_SHEETS
+MimeType.GOOGLE_SLIDES
+
+
+Chapter 8: DriveApp Service - Files by type and search string
+---Get files by file type with matching string in file name - Get all Google Forms with the word "Untitled" in the file name.
+function mainSearchFunction(searchStr) {
+var fileInfo,arrayFileIDs,arrayFileNames,arrayOfIndexNumbers,
+allFileIDsWithStringInName,i,searchStr,thisID;//Declare variables
+if (!searchStr) {
+searchStr = "Untitled";//Assign a string value to the variable
+};
+fileInfo = getFilesOfType();//Run a function that returns files information
+arrayFileNames = fileInfo[1];//Get the array of file names
+arrayOfIndexNumbers = searchFileNamesForString(arrayFileNames,searchStr);
+//Logger.log('searchStr: ' + searchStr)
+//Logger.log(arrayOfIndexNumbers)
+allFileIDsWithStringInName = [];
+arrayFileIDs = fileInfo[0];
+for (i=0;i<arrayOfIndexNumbers.length;i+=1) {
+thisID = arrayFileIDs[arrayOfIndexNumbers[i]];
+allFileIDsWithStringInName.push(thisID);
+};
+Logger.log(allFileIDsWithStringInName)
+};
+function getFilesOfType() {
+var allFormFiles,arrFileName,arrFileID,arrFileUrls,thisFile;
+allFormFiles = DriveApp.getFilesByType(MimeType.GOOGLE_FORMS);
+arrFileName = [];
+arrFileID = [];
+arrFileUrls = [];
+while (allFormFiles.hasNext()) {
+thisFile=allFormFiles.next();
+arrFileName.push(thisFile.getName());
+arrFileID.push(thisFile.getId());
+arrFileUrls.push(thisFile.getUrl());
+};
+//Logger.log(arrFileName)
+return [arrFileID,arrFileName];
+};
+function searchFileNamesForString(arrayFileNames,searchStr) {
+var arrayIndexNumbers,i,L,thisName;
+arrayIndexNumbers = [];
+L = arrayFileNames.length;
+for (i=0;i<L;i+=1){
+thisName = arrayFileNames[i];
+Logger.log(thisName);
+Logger.log('thisName.indexOf(searchStr): ' + thisName.indexOf(searchStr));
+if (thisName.indexOf(searchStr) !== -1) {
+arrayIndexNumbers.push(i);
+};
+};
+return arrayIndexNumbers;
+};
+
+Chapter 9: Firebase and AppScript :
+
+Chapter 11: Google sheets MailApp
+
+--MailApp is the api from Google App Script that can be used to send mail
+function sendEmails() {
+var subject = "A subject for your new app!";
+var message = "And this is the very first message"
+var recipientEmail = "abc@example.com";
+MailApp.sendEmail(recipientEmail, subject, message);
+}
+
+function checkQuota() {
+Logger.log(MailApp.getRemainingDailyQuota());
+}
+
+
+-- Access data from sheet
+function getSheetData() {
+var sheet = SpreadsheetApp.getActiveSheet();
+var startRow = 2; // First row of data to process
+var numRows = 100; // Number of rows to process
+var startCol = 1; //First column of data to process
+var numCols = 15; // Number of columns to process
+var dataRange = sheet.getRange(startRow, startCol, numRows, numCols);
+// Fetch values for each row in the Range.
+var data = dataRange.getValues();
+return data;
+}
+
+--method 2
+function getDataSheet() {
+sheet = SpreadsheetApp.getActiveSheet();
+//Get data range based on content
+var dataRange = sheet.getDataRange();
+// Fetch values for each row in the Range.
+var data = dataRange.getValues();
+return data;
+}
+
+---The function for sending out an email is as follows:
+function getDataSheet() {
+sheet = SpreadsheetApp.getActiveSheet();
+startRow = 2; // First row of data to process
+numRows = 100; // Number of rows to process
+startCol = 1; //First column of data to process
+numCols = 15; // Number of columns to process
+var dataRange = sheet.getRange(startRow, startCol, numRows, numCols);
+// Fetch values for each row in the Range.
+var data = dataRange.getValues();
+return data;
+}
+function getMessage(name, amount) {
+return "Hello " + name + ", Your reimbursement for amount " + amount + " is processed
+successfully";
+}
+function sendEmail() {
+var emailSent = "Yes";
+var reimbursed = "Yes";
+var emailCol = 5;
+var data = getDataSheet();
+for (var i = 0; i < data.length; i++) {
+var row = data[i];
+var isReimbursed = row[3];
+var isEmailSent = row[4];
+var name = row[0];
+var amount = row[2];
+if(isReimbursed == reimbursed && isEmailSent != emailSent) {
+var subject = "Reimbursement details";
+var message = getMessage(name, amount);
+var recipientEmail = row[1];
+MailApp.sendEmail(recipientEmail, subject, message);
+//Sheet range starts from index 1 and data range starts from index 0
+sheet.getRange(1 + i, emailCol).setValue(emailSent);
+}
+}
+}
+
+Chapter 12: Google Web App Script To Auto Download From Google Drive
+
+Chapter 14: Spreadsheet Service
+Remarks
+The official API reference for the Spreadsheet Service can be found at
+https://developers.google.com/apps-script/reference/spreadsheet/.
+Examples
+Sheet
+Getting a reference to a named sheet tab
+var spread_sheet = SpreadsheetApp.getActiveSpreadsheet();//Get active spreadsheet
+var sheet_with_name_a = spread_sheet.getSheetByName("sheet_tab_name");
+Getting active sheet tab
+var spread_sheet = SpreadsheetApp.getActiveSpreadsheet();
+var active_sheet = spread_sheet.getActiveSheet();
+Insert Column
+var spread_sheet = SpreadsheetApp.getActiveSpreadsheet();
+var active_sheet = spread_sheet.getActiveSheet();
+active_sheet.insertColumnAfter(1); // This inserts a column after the first column position
+active_sheet.insertColumnBefore(1); // This inserts a column in the first column position
+active_sheet.insertColumns(1); // Shifts all columns by one
+active_sheet.insertColumns(1, 3); // Shifts all columns by three
+active_sheet.insertColumnsAfter(1); // This inserts a column in the second column position
+active_sheet.insertColumnsBefore(1, 5); // This inserts five columns before the first column
+Insert row
+var spread_sheet = SpreadsheetApp.getActiveSpreadsheet();
+var active_sheet = spread_sheet.getActiveSheet();
+active_sheet.insertRowAfter(1); // This inserts a row after the first row position
+active_sheet.insertRowBefore(1); // This inserts a row in the first row position
+active_sheet.insertRows(1); // Shifts all rows by one
+active_sheet.insertRows(1, 3); // Shifts all rows by three
+active_sheet.insertRowsAfter(1); // This inserts a row in the second row position
+active_sheet.insertRowsBefore(1, 5); // This inserts five rows before the first row
+Cell value
+var spread_sheet = SpreadsheetApp.getActiveSpreadsheet();
+var active_sheet = spread_sheet.getActiveSheet();
+var cell = range.getCell(1, 1);
+var cell_value = cell.getValue();
+https://riptutorial.com/ 45
+cell.setValue(100);
+Copy cells
+var spread_sheet = SpreadsheetApp.getActiveSpreadsheet();
+var active_sheet = spread_sheet.getActiveSheet();
+var rangeToCopy = active_sheet.getRange(1, 1, sheet.getMaxRows(), 5);
+rangeToCopy.copyTo(sheet.getRange(1, 6));
+Formula
+var spread_sheet = SpreadsheetApp.getActiveSpreadsheet();
+var active_sheet = spread_sheet.getActiveSheet();
+var range = active_sheet.getRange("B5");
+var formula = range.getFormula()
+range.setFormula("=SUM(B3:B4)");
+Copy a value from one sheet to current sheet
+Imagine that we have a separate Google spreadsheet, and we need to get the B2 cell value to cell
+D5 on your current sheet.
+function copyValueandPaste()
+{
+var source = SpreadsheetApp.openById('spread sheet id is here'); //Separate spreadsheet
+book
+var sourcesheet = source.getSheetByName('Sheet1'); //Sheet tab with source data
+var sourceCellValue = sourcesheet.getRange('B2').getValue(); // get B2 cell value
+var thisBook = SpreadsheetApp.getActive(); // Active spreadsheet book
+var thisSheet = thisBook.getSheetByName('Sheet1'); // Target sheet
+thisSheet.getRange('D5').setValue(sourceCellValue); //Set value to target sheet D5 cell
+}
+You can find spreadsheet id from your URL.
+Get the last row in a single column
+function lastRowForColumn(sheet, column){
+// Get the last row with data for the whole sheet.
+var numRows = sheet.getLastRow();
+// Get all data for the given column
+var data = sheet.getRange(1, column, numRows).getValues();
+// Iterate backwards and find first non empty cell
+for(var i = data.length - 1 ; i >= 0 ; i--){
+if (data[i][0] != null && data[i][0] != ""){
+return i + 1;
+}
+}
+}
+
+
+Inserting Arrays as Rows
+Inserting a row at the bottom of a spreadsheet is easy:
+var someSheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+someSheet.appendRow(["Frodo", "Baggins", "Hobbit", "The Shire", 33]);
+Note this will add the row after the last non-empty row.
+Inserting a row somewhere in the middle is a bit more work:
+var someSheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+var newRowIndex = 2;
+var row = ["Gandalf", "?", "Wizard", "?", 2019];
+someSheet.insertRowBefore(newRowIndex);
+// getRange(row, col, numRows, numCols)
+someSheet.getRange(newRowIndex, 1, 1, row.length).setValues([row]); // Note 2D array!
+A lot of this useless code can be abstracted into a helper function:
+function insertRowBefore(sheet, rowIndex, rowData) {
+sheet.insertRowBefore(rowIndex);
+sheet.getRange(rowIndex, 1, 1, rowData.length).setValues([rowData]);
+}
+Which reduces our example to just:
+var someSheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+insertRowBefore(someSheet, 2, ["Gandalf", "?", "Wizard", "?", 2019]);
+
+
+getActive() - Get active spreadsheet
+This returns the currently active spreadsheet, or null if there is none.
+var currentSheet = SpreadsheetApp.getActive();
+var url = currentSheet.getUrl();
+Logger.log( url );
+
+
+
+
+
+
+
+-------------End Book Learning google-apps Scripts------------------------
